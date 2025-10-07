@@ -6,7 +6,7 @@
     <title>System Management Process Designer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         :root {
@@ -16,109 +16,121 @@
 
         body {
             margin: 0;
-            background: #f6f7fb;
+            background: #eef1f8;
             color: #1f2430;
         }
 
         header {
-            padding: 1.5rem 2rem;
-            background: linear-gradient(135deg, #1f4b99, #2684ff);
+            padding: 1.5rem 2.5rem;
+            background: linear-gradient(135deg, #143d7a, #2f8dff);
             color: #fff;
-            box-shadow: 0 4px 16px rgba(18, 43, 96, 0.25);
+            box-shadow: 0 10px 30px rgba(24, 66, 140, 0.28);
         }
 
         header h1 {
             margin: 0;
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 700;
+            letter-spacing: 0.01em;
         }
 
         header p {
-            margin: 0.35rem 0 0;
-            font-size: 0.95rem;
-            max-width: 52rem;
-            line-height: 1.5;
+            margin: 0.5rem 0 0;
+            max-width: 60rem;
+            line-height: 1.6;
+            font-size: 1.02rem;
         }
 
         main {
             display: grid;
-            grid-template-columns: 320px 1fr;
-            min-height: calc(100vh - 96px);
+            grid-template-columns: 360px 1fr;
+            min-height: calc(100vh - 112px);
         }
 
         aside {
-            padding: 1.5rem;
+            padding: 1.75rem 1.5rem 2rem;
             background: #ffffff;
-            border-right: 1px solid #e3e7f1;
+            border-right: 1px solid #dbe3f5;
             overflow-y: auto;
         }
 
         aside h2 {
-            margin-top: 0;
-            font-size: 1.2rem;
+            margin: 0 0 0.75rem;
+            font-size: 1.25rem;
+        }
+
+        aside h3 {
+            margin: 1.75rem 0 0.5rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #4a5a78;
         }
 
         label {
             display: block;
-            margin-top: 1rem;
-            font-weight: 600;
             font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 1rem;
         }
 
         input[type="text"], textarea, select {
             width: 100%;
-            margin-top: 0.35rem;
+            margin-top: 0.45rem;
             padding: 0.65rem 0.75rem;
             font-size: 0.95rem;
-            border: 1px solid #d0d7e6;
-            border-radius: 8px;
-            background: #f9fafc;
-            transition: border-color 0.2s ease;
-        }
-
-        input[type="text"]:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: #2684ff;
-            background: #fff;
+            border: 1px solid #cfd6e6;
+            border-radius: 10px;
+            background: #f7f9ff;
+            transition: border-color 0.2s ease, background 0.2s ease;
         }
 
         textarea {
-            min-height: 110px;
             resize: vertical;
+            min-height: 96px;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #2f8dff;
+            background: #ffffff;
         }
 
         .button-row {
             margin-top: 1.25rem;
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 0.75rem;
         }
 
         button {
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 0.75rem 1rem;
             font-weight: 600;
             font-size: 0.95rem;
             cursor: pointer;
             transition: transform 0.15s ease, box-shadow 0.2s ease;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.45rem;
         }
 
         button.primary {
-            background: #2684ff;
+            background: linear-gradient(135deg, #2f8dff, #1c5fb8);
             color: #fff;
-            box-shadow: 0 8px 18px rgba(38, 132, 255, 0.32);
+            box-shadow: 0 12px 24px rgba(47, 141, 255, 0.28);
         }
 
         button.secondary {
-            background: #e8efff;
-            color: #1f4b99;
+            background: #e6edff;
+            color: #1c4d9c;
         }
 
         button.danger {
-            background: #ff4d5a;
+            background: linear-gradient(135deg, #ff5f6d, #ff9966);
             color: #fff;
         }
 
@@ -126,137 +138,179 @@
             opacity: 0.6;
             cursor: not-allowed;
             box-shadow: none;
+            transform: none !important;
         }
 
         button:not(:disabled):hover {
             transform: translateY(-1px);
-            box-shadow: 0 10px 24px rgba(31, 75, 153, 0.16);
-        }
-
-        .panel-section {
-            margin-top: 1.5rem;
-        }
-
-        .panel-section:first-of-type {
-            margin-top: 0;
-        }
-
-        .panel-section h3 {
-            font-size: 0.9rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #4b5876;
-            margin-bottom: 0.5rem;
+            box-shadow: 0 12px 30px rgba(31, 75, 153, 0.24);
         }
 
         .selected-node {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-            padding: 0.75rem;
-            background: #f0f4ff;
-            border: 1px solid #d7e2ff;
-            border-radius: 10px;
+            padding: 1rem 1.1rem;
+            border-radius: 12px;
+            background: #f1f6ff;
+            border: 1px solid #ccd9f5;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            display: grid;
+            gap: 0.35rem;
         }
 
         .selected-node strong {
-            font-size: 1rem;
-            color: #1f4b99;
-        }
-
-        .tree-container {
-            position: relative;
-            background: #f6f7fb;
-            overflow: hidden;
-        }
-
-        svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        .node circle {
-            fill: #fff;
-            stroke: #1f4b99;
-            stroke-width: 2px;
-            transition: fill 0.2s ease;
-        }
-
-        .node circle.selected {
-            fill: #ffdd57;
-            stroke: #ffaa00;
-        }
-
-        .node text {
-            font-size: 0.85rem;
-            font-weight: 600;
-            fill: #1f2430;
-            text-anchor: middle;
-            pointer-events: none;
-        }
-
-        .link {
-            fill: none;
-            stroke: #b7c4dd;
-            stroke-width: 2px;
-        }
-
-        .toolbar {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-        }
-
-        .toolbar button {
-            flex: 1;
-        }
-
-        .file-input {
-            position: relative;
-            overflow: hidden;
-        }
-
-        .file-input input {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .upload-button {
-            border: 2px dashed #a7b4ce;
-            padding: 0.75rem 1rem;
-            background: transparent;
-            color: #1f4b99;
-            font-weight: 600;
-            border-radius: 10px;
-            text-align: center;
+            font-size: 1.05rem;
+            color: #1c4d9c;
         }
 
         .legend {
+            margin-top: 1rem;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: 0.5rem;
             font-size: 0.85rem;
-            margin-top: 0.75rem;
         }
 
         .legend span {
             display: flex;
             align-items: center;
-            gap: 0.35rem;
+            gap: 0.4rem;
         }
 
         .legend i {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
+            display: inline-flex;
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
         }
 
-        @media (max-width: 960px) {
+        .layer-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .layer-buttons button {
+            flex: 1 1 auto;
+            min-width: 110px;
+            padding: 0.55rem 0.75rem;
+            font-size: 0.85rem;
+            background: #f2f6ff;
+            color: #1e3d7a;
+            border-radius: 999px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        .layer-buttons button.active {
+            background: linear-gradient(135deg, #2f8dff, #1c5fb8);
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(47, 141, 255, 0.25);
+        }
+
+        .tree-wrapper {
+            position: relative;
+            background: #eef1f8;
+        }
+
+        .workspace-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .workspace-scroll {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-image: linear-gradient(to right, rgba(31, 77, 156, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(31, 77, 156, 0.08) 1px, transparent 1px);
+            background-size: 60px 60px;
+            position: relative;
+        }
+
+        svg {
+            width: 2400px;
+            height: 1600px;
+        }
+
+        .workspace-overlay {
+            position: absolute;
+            right: 1.25rem;
+            bottom: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .workspace-overlay button {
+            padding: 0.6rem 0.75rem;
+            min-width: 48px;
+            border-radius: 12px;
+        }
+
+        .node-box {
+            cursor: grab;
+        }
+
+        .node-box:active {
+            cursor: grabbing;
+        }
+
+        .node-rect {
+            stroke-width: 2px;
+            rx: 18;
+            ry: 18;
+        }
+
+        .node-content {
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: #1f2430;
+        }
+
+        .node-content .title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.15rem;
+        }
+
+        .node-content .subtitle {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: rgba(30, 61, 122, 0.82);
+            margin-bottom: 0.4rem;
+        }
+
+        .node-content .description {
+            font-size: 0.78rem;
+            color: rgba(31, 36, 48, 0.88);
+            margin-bottom: 0.4rem;
+        }
+
+        .node-content .meta {
+            font-size: 0.72rem;
+            color: rgba(31, 36, 48, 0.7);
+            margin-bottom: 0.35rem;
+        }
+
+        .node-content ul {
+            margin: 0.4rem 0 0;
+            padding-left: 1rem;
+        }
+
+        .node-content li {
+            margin-bottom: 0.25rem;
+        }
+
+        .node-box.selected .node-rect {
+            stroke: #ffb347;
+            stroke-width: 3px;
+        }
+
+        .node-box.selected .node-content .title {
+            color: #1c4d9c;
+        }
+
+        @media (max-width: 1080px) {
             main {
                 grid-template-columns: 1fr;
                 grid-template-rows: auto 1fr;
@@ -264,7 +318,12 @@
 
             aside {
                 border-right: none;
-                border-bottom: 1px solid #e3e7f1;
+                border-bottom: 1px solid #dbe3f5;
+            }
+
+            svg {
+                width: 1800px;
+                height: 1400px;
             }
         }
     </style>
@@ -273,30 +332,35 @@
     <header>
         <h1>System Management Process Designer</h1>
         <p>
-            Build multi-layered operational flows across your organization. Zoom out to map enterprise-level systems,
-            zoom in to design milestone workflows, and dive deep to define SOPs for every task. Export your framework as JSON
-            for sharing and versioning, or upload an existing design to continue iterating.
+            Design layered organisational maps with milestones, tasks, SOPs and approval flows. Navigate through layers,
+            drag and align nodes on a grid, and capture detailed process data for every branch of your operating system.
         </p>
     </header>
     <main>
         <aside>
-            <section class="panel-section">
+            <section>
                 <h2>Selection</h2>
                 <div class="selected-node" id="selectedNodePanel">
                     <span>No node selected</span>
                 </div>
                 <div class="legend">
-                    <span><i style="background:#2684ff"></i> System / Process</span>
+                    <span><i style="background:#2f8dff"></i> System / Process</span>
                     <span><i style="background:#57c4ff"></i> Milestone</span>
                     <span><i style="background:#ffb347"></i> Task</span>
                     <span><i style="background:#ffdd57"></i> SOP Detail</span>
                 </div>
+                <h3>Layer View</h3>
+                <div class="layer-buttons" id="layerButtons"></div>
+                <button class="secondary" id="showAllLayers" style="margin-top:0.75rem; width:100%;">Show all layers</button>
             </section>
 
-            <section class="panel-section">
+            <section>
                 <h3>Node Details</h3>
                 <label for="nodeTitle">Title</label>
                 <input type="text" id="nodeTitle" placeholder="Name of process / task" />
+
+                <label for="nodeSubtitle">Subtitle</label>
+                <input type="text" id="nodeSubtitle" placeholder="Short context" />
 
                 <label for="nodeType">Layer</label>
                 <select id="nodeType">
@@ -306,30 +370,59 @@
                     <option value="sop">SOP Detail</option>
                 </select>
 
-                <label for="nodeDescription">Description / SOP</label>
-                <textarea id="nodeDescription" placeholder="Capture key instructions, owners, inputs, outputs, or SOP steps..."></textarea>
+                <label for="nodeDescription">Description</label>
+                <textarea id="nodeDescription" placeholder="Overview, purpose, key steps"></textarea>
+
+                <label for="nodeFlow">Workflow Notes</label>
+                <textarea id="nodeFlow" placeholder="Visual flow summary, decision points, owners"></textarea>
+
+                <label for="nodeRelated">Related / Overlapping Tasks</label>
+                <input type="text" id="nodeRelated" placeholder="Comma separated" />
+
+                <label for="nodeApprovals">Approval Flow</label>
+                <textarea id="nodeApprovals" placeholder="Who signs off, escalation path"></textarea>
+
+                <label for="nodeTiming">Timings</label>
+                <input type="text" id="nodeTiming" placeholder="SLAs, durations, deadlines" />
 
                 <div class="button-row">
-                    <button class="primary" id="updateNode">Update Selected Node</button>
-                    <button class="secondary" id="addChild">Add Child to Selected</button>
-                    <button class="danger" id="deleteNode">Delete Selected Node</button>
+                    <button class="primary" id="updateNode">Update</button>
+                    <button class="secondary" id="addChild">Add Child</button>
+                    <button class="secondary" id="duplicateNode">Duplicate</button>
+                    <button class="danger" id="deleteNode">Delete</button>
                 </div>
             </section>
 
-            <section class="panel-section">
+            <section>
+                <h3>Move Node</h3>
+                <label for="moveParentSelect">Move to parent</label>
+                <select id="moveParentSelect"></select>
+                <button class="secondary" id="moveNode" style="margin-top:0.75rem; width:100%;">Move Selected Node</button>
+            </section>
+
+            <section>
                 <h3>Import & Export</h3>
-                <div class="toolbar">
+                <div class="button-row" style="grid-template-columns: repeat(1, minmax(0, 1fr));">
                     <button class="secondary" id="resetTree">Reset to Template</button>
                     <button class="primary" id="downloadTree">Download JSON</button>
                 </div>
-                <div class="file-input" style="margin-top: 0.75rem;">
-                    <div class="upload-button">Upload JSON Design</div>
-                    <input type="file" id="uploadInput" accept="application/json" />
+                <div class="file-input" style="margin-top: 0.75rem; position:relative;">
+                    <button class="secondary" style="width:100%;">Upload JSON Design</button>
+                    <input type="file" id="uploadInput" accept="application/json" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
                 </div>
             </section>
         </aside>
-        <section class="tree-container">
-            <svg id="tree"></svg>
+        <section class="tree-wrapper">
+            <div class="workspace-container">
+                <div class="workspace-scroll" id="workspaceScroll">
+                    <svg id="treeCanvas"></svg>
+                </div>
+                <div class="workspace-overlay">
+                    <button class="secondary" id="zoomIn">Zoom In</button>
+                    <button class="secondary" id="zoomOut">Zoom Out</button>
+                    <button class="secondary" id="resetView">Reset View</button>
+                </div>
+            </div>
         </section>
     </main>
 
@@ -337,26 +430,46 @@
         const treeDataTemplate = {
             id: "root",
             title: "Company Operating System",
+            subtitle: "High-level strategy",
             type: "system",
-            description: "Top-level structure capturing the organization-wide operating model.",
+            description: "Top-level structure capturing the organization-wide operating model and customer commitment framework.",
+            flow: "Start from market engagement through delivery and continuous improvement.",
+            related: "",
+            approvals: "Executive leadership review",
+            timing: "Annual review",
             children: [
                 {
                     id: "milestone-1",
                     title: "Customer Lifecycle",
+                    subtitle: "From first touch to advocacy",
                     type: "milestone",
-                    description: "Journey from lead acquisition through retention and advocacy.",
+                    description: "Journey from lead acquisition through onboarding, delivery, renewal, and advocacy.",
+                    flow: "Marketing → Sales → Delivery → Success",
+                    related: "Revenue Operations",
+                    approvals: "VP Sales",
+                    timing: "Quarterly checkpoints",
                     children: [
                         {
                             id: "task-1",
                             title: "Lead Intake",
+                            subtitle: "Qualify inbound requests",
                             type: "task",
-                            description: "Qualify inbound leads, capture requirements, and hand off to sales.",
+                            description: "Capture requirements, qualify fit, and hand off to sales for proposal creation.",
+                            flow: "Lead capture form → CRM → SDR review",
+                            related: "Marketing Ops, Sales Ops",
+                            approvals: "Sales Manager",
+                            timing: "Within 1 business day",
                             children: [
                                 {
                                     id: "sop-1",
                                     title: "Lead Intake SOP",
+                                    subtitle: "Detailed intake process",
                                     type: "sop",
-                                    description: "1. Review inbound request\n2. Conduct discovery call\n3. Document in CRM\n4. Assign owner",
+                                    description: "1. Review inbound request\n2. Schedule discovery call\n3. Document findings in CRM\n4. Assign owner",
+                                    flow: "Discovery call → Qualification → Routing",
+                                    related: "Account Executive",
+                                    approvals: "Sales Director",
+                                    timing: "Complete within 48 hours",
                                     children: []
                                 }
                             ]
@@ -366,8 +479,13 @@
                 {
                     id: "milestone-2",
                     title: "Internal Enablement",
+                    subtitle: "Equip teams to deliver",
                     type: "milestone",
-                    description: "Systems ensuring teams can execute consistently with the operating model.",
+                    description: "Systems that ensure teams execute consistently with the operating model.",
+                    flow: "Training → Tooling → QA",
+                    related: "People Ops",
+                    approvals: "COO",
+                    timing: "Monthly cadences",
                     children: []
                 }
             ]
@@ -378,34 +496,33 @@
         let nodeIdCounter = 1000;
         let currentZoomScale = 1;
 
-        const svg = d3.select("#tree");
-        const width = window.innerWidth - 360;
-        const height = window.innerHeight - 140;
+        const typeOrder = ["system", "milestone", "task", "sop"];
+        const gridSize = 60;
 
-        const g = svg
-            .attr("viewBox", [-width / 2, -height / 2, width, height])
-            .append("g")
-            .attr("class", "tree-root");
+        const svg = d3.select("#treeCanvas");
+        const svgRoot = svg.append("g").attr("class", "tree-root");
+        const linkLayer = svgRoot.append("g").attr("class", "links");
+        const nodeLayer = svgRoot.append("g").attr("class", "nodes");
 
-        const zoom = d3.zoom()
-            .scaleExtent([0.25, 3])
+        const zoomBehavior = d3.zoom()
+            .scaleExtent([0.25, 3.5])
             .on("zoom", (event) => {
                 g.attr("transform", event.transform);
                 currentZoomScale = event.transform.k;
                 applyZoomVisibility();
             });
 
-        svg.call(zoom).call(zoom.transform, d3.zoomIdentity);
+        svg.call(zoomBehavior).call(zoomBehavior.transform, currentZoomTransform);
+        svg.on("dblclick.zoom", null);
 
-        const treeLayout = d3.tree().nodeSize([90, 180]);
-        const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+        const treeLayout = d3.tree().nodeSize([140, 280]);
 
-        const nodeColor = {
-            system: "#2684ff",
-            milestone: "#57c4ff",
-            task: "#ffb347",
-            sop: "#ffdd57"
-        };
+        function visibleDepthForScale(scale) {
+            if (scale < 0.6) return 1;
+            if (scale < 1.4) return 2;
+            if (scale < 2.4) return 3;
+            return Infinity;
+        }
 
         function visibleDepthForScale(scale) {
             if (scale < 1.2) return 1; // Company system + milestones
@@ -427,67 +544,176 @@
         function update(selectedId = selectedNode?.id) {
             const root = d3.hierarchy(treeData, d => (d.collapsed ? null : d.children));
             treeLayout(root);
+            root.each(d => {
+                d.data.layoutX = d.x;
+                d.data.layoutY = d.y;
+            });
+        }
 
-            const nodes = g.selectAll(".node")
-                .data(root.descendants(), d => d.data.id);
+        function positionFromDatum(nodeDatum) {
+            const x = nodeDatum.data.customX ?? nodeDatum.data.layoutY ?? 0;
+            const y = nodeDatum.data.customY ?? nodeDatum.data.layoutX ?? 0;
+            return { x, y };
+        }
 
-            const links = g.selectAll(".link")
-                .data(root.links(), d => d.target.data.id);
+        function computeBoxSize(data) {
+            const baseWidth = 240;
+            const longestLine = Math.max(data.title?.length || 0, data.subtitle?.length || 0, data.description?.length || 0);
+            const width = Math.min(360, Math.max(baseWidth, longestLine * 7));
+
+            let height = 140;
+            if (data.description) height += Math.ceil(data.description.split(/\n|\.\s+/).length * 16);
+            if (data.flow) height += 36;
+            if (data.related) height += 28;
+            if (data.approvals) height += 28;
+            if (data.timing) height += 24;
+            const childCount = (data.children?.length || 0);
+            if (childCount) height += childCount * 20 + 16;
+            return { width, height };
+        }
+
+        function generateLinkPath(source, target) {
+            const midX = (source.x + target.x) / 2;
+            return `M${source.x},${source.y}C${midX},${source.y} ${midX},${target.y} ${target.x},${target.y}`;
+        }
+
+        function refreshLinkPaths() {
+            linkLayer.selectAll("path.link")
+                .attr("d", d => generateLinkPath(positionFromDatum(d.source), positionFromDatum(d.target)));
+        }
+
+        function update(selectedId = selectedNode?.id) {
+            const root = d3.hierarchy(treeData, d => d.children || []);
+            assignLayout(root);
+
+            const nodesData = root.descendants();
+            const linksData = root.links();
+
+            const links = linkLayer.selectAll("path.link")
+                .data(linksData, d => d.target.data.id);
 
             links.enter()
                 .append("path")
                 .attr("class", "link")
-                .merge(links)
-                .attr("d", diagonal);
+                .attr("stroke", "rgba(43, 61, 117, 0.35)")
+                .attr("stroke-width", 2)
+                .attr("fill", "none")
+                .merge(links);
 
             links.exit().remove();
 
+            const nodes = nodeLayer.selectAll("g.node-box")
+                .data(nodesData, d => d.data.id);
+
             const nodeEnter = nodes.enter()
                 .append("g")
-                .attr("class", "node")
-                .attr("transform", d => `translate(${d.y},${d.x})`)
-                .on("click", (_, d) => {
+                .attr("class", "node-box")
+                .call(d3.drag()
+                    .on("start", function (event) {
+                        event.sourceEvent?.stopPropagation();
+                    })
+                    .on("drag", function (event, d) {
+                        const snappedX = Math.round(event.x / gridSize) * gridSize;
+                        const snappedY = Math.round(event.y / gridSize) * gridSize;
+                        d.data.customX = snappedX;
+                        d.data.customY = snappedY;
+                        const box = d.box || computeBoxSize(d.data);
+                        d3.select(this)
+                            .attr("transform", `translate(${snappedX - box.width / 2}, ${snappedY - box.height / 2})`);
+                        refreshLinkPaths();
+                    })
+                    .on("end", function () {
+                        update();
+                    }))
+                .on("click", (event, d) => {
+                    event.stopPropagation();
                     selectNode(d.data);
                     update(d.data.id);
                 })
-                .on("dblclick", (_, d) => toggleCollapse(d));
+                .on("dblclick", (event) => event.stopPropagation());
 
-            nodeEnter.append("circle")
-                .attr("r", 28)
-                .attr("fill", d => nodeColor[d.data.type] || "#fff");
+            nodeEnter.append("rect")
+                .attr("class", "node-rect");
 
-            nodeEnter.append("text")
-                .attr("dy", 4)
-                .text(d => d.data.title);
+            nodeEnter.append("foreignObject")
+                .attr("class", "node-fo")
+                .append("xhtml:div")
+                .attr("class", "node-content");
 
-            const nodeUpdate = nodeEnter.merge(nodes);
-            nodeUpdate.transition().attr("transform", d => `translate(${d.y},${d.x})`);
+            const merged = nodeEnter.merge(nodes);
 
-            nodeUpdate.select("circle")
-                .attr("fill", d => nodeColor[d.data.type] || "#fff")
-                .classed("selected", d => d.data.id === selectedId);
+            merged.each(function (d) {
+                d.box = computeBoxSize(d.data);
+            });
 
-            nodeUpdate.select("text").text(d => d.data.title);
+            merged.select("rect.node-rect")
+                .attr("width", d => d.box.width)
+                .attr("height", d => d.box.height)
+                .attr("fill", d => (typeColors[d.data.type] || typeColors.system).fill)
+                .attr("stroke", d => (typeColors[d.data.type] || typeColors.system).stroke);
+
+            merged.select("foreignObject.node-fo")
+                .attr("width", d => d.box.width - 24)
+                .attr("height", d => d.box.height - 24)
+                .attr("x", 12)
+                .attr("y", 12)
+                .select("div.node-content")
+                .html(d => renderNodeContent(d.data));
+
+            merged
+                .classed("selected", d => d.data.id === selectedId)
+                .attr("transform", d => {
+                    const { x, y } = positionFromDatum(d);
+                    return `translate(${x - d.box.width / 2}, ${y - d.box.height / 2})`;
+                });
 
             nodes.exit().remove();
 
             applyZoomVisibility();
         }
 
-        function toggleCollapse(datum) {
-            if (!datum.data.children || datum.data.children.length === 0) return;
-            datum.data.collapsed = !datum.data.collapsed;
-            update(datum.data.id);
+        function applyVisibility() {
+            const zoomLimit = visibleDepthForScale(currentZoomTransform.k);
+            const nodes = nodeLayer.selectAll("g.node-box");
+            const links = linkLayer.selectAll("path.link");
+
+            nodes.attr("display", d => {
+                if (manualLayerDepth !== null && selectedNode) {
+                    const depth = relativeDepthMap.get(d.data.id);
+                    if (depth === undefined || depth > manualLayerDepth) {
+                        return "none";
+                    }
+                }
+                return d.depth <= zoomLimit ? null : "none";
+            });
+
+            links.attr("display", d => {
+                const targetDepth = d.target.depth;
+                if (manualLayerDepth !== null && selectedNode) {
+                    const depth = relativeDepthMap.get(d.target.data.id);
+                    if (depth === undefined || depth > manualLayerDepth) {
+                        return "none";
+                    }
+                }
+                return targetDepth <= zoomLimit ? null : "none";
+            });
         }
 
         function selectNode(nodeData, updateForm = true) {
             selectedNode = nodeData;
+            computeRelativeDepth();
             updateSelectedPanel(nodeData);
+            refreshLayerButtons();
 
-            if (updateForm) {
+            if (updateForm && nodeData) {
                 document.getElementById("nodeTitle").value = nodeData.title || "";
+                document.getElementById("nodeSubtitle").value = nodeData.subtitle || "";
                 document.getElementById("nodeType").value = nodeData.type || "system";
                 document.getElementById("nodeDescription").value = nodeData.description || "";
+                document.getElementById("nodeFlow").value = nodeData.flow || "";
+                document.getElementById("nodeRelated").value = nodeData.related || "";
+                document.getElementById("nodeApprovals").value = nodeData.approvals || "";
+                document.getElementById("nodeTiming").value = nodeData.timing || "";
             }
         }
 
@@ -498,112 +724,236 @@
                 document.getElementById("deleteNode").disabled = true;
                 document.getElementById("updateNode").disabled = true;
                 document.getElementById("addChild").disabled = true;
+                document.getElementById("duplicateNode").disabled = true;
+                document.getElementById("moveNode").disabled = true;
+                document.getElementById("moveParentSelect").disabled = true;
                 return;
             }
 
             panel.innerHTML = `
-                <strong>${node.title}</strong>
-                <span>Layer: ${formatType(node.type)}</span>
-                <span>${node.description ? node.description.replace(/\n/g, "<br>") : "No documentation yet."}</span>
+                <strong>${escapeHTML(node.title)}</strong>
+                <span>Layer: ${typeLabels[node.type] || node.type}</span>
+                <span>${node.subtitle ? escapeHTML(node.subtitle) : "No subtitle"}</span>
+                <span>${node.description ? escapeHTML(node.description).replace(/\n/g, '<br>') : "No description yet."}</span>
             `;
 
             document.getElementById("deleteNode").disabled = node.id === "root";
             document.getElementById("updateNode").disabled = false;
             document.getElementById("addChild").disabled = false;
+            document.getElementById("duplicateNode").disabled = node.id === "root";
+            document.getElementById("moveNode").disabled = node.id === "root";
+            document.getElementById("moveParentSelect").disabled = node.id === "root";
         }
 
-        function formatType(type) {
-            switch (type) {
-                case "system":
-                    return "Company System";
-                case "milestone":
-                    return "Milestone";
-                case "task":
-                    return "Task";
-                case "sop":
-                    return "SOP Detail";
-                default:
-                    return type;
+        function refreshLayerButtons() {
+            const container = document.getElementById("layerButtons");
+            container.innerHTML = "";
+            if (!selectedNode) return;
+            const maxDepth = maxDepthFromNode(selectedNode);
+            for (let i = 0; i <= maxDepth; i++) {
+                const btn = document.createElement("button");
+                btn.textContent = i === 0 ? "Current Layer" : `Layer +${i}`;
+                btn.className = "secondary";
+                if (manualLayerDepth === i) btn.classList.add("active");
+                btn.addEventListener("click", () => {
+                    manualLayerDepth = i;
+                    applyVisibility();
+                    refreshLayerButtons();
+                });
+                container.appendChild(btn);
             }
         }
 
-        function generateId(prefix) {
-            nodeIdCounter += 1;
-            return `${prefix}-${nodeIdCounter}`;
+        function maxDepthFromNode(node) {
+            let maxDepth = 0;
+            function recurse(current, depth) {
+                maxDepth = Math.max(maxDepth, depth);
+                (current.children || []).forEach(child => recurse(child, depth + 1));
+            }
+            recurse(node, 0);
+            return maxDepth;
+        }
+
+        function computeRelativeDepth() {
+            relativeDepthMap = new Map();
+            if (!selectedNode) return;
+            const queue = [{ node: treeData, depth: 0 }];
+            const targetId = selectedNode.id;
+            let startNode = null;
+
+            while (queue.length) {
+                const { node } = queue.shift();
+                if (node.id === targetId) {
+                    startNode = node;
+                    break;
+                }
+                (node.children || []).forEach(child => queue.push({ node: child, depth: 0 }));
+            }
+
+            if (!startNode) return;
+
+            const stack = [{ node: startNode, depth: 0 }];
+            while (stack.length) {
+                const { node, depth } = stack.pop();
+                relativeDepthMap.set(node.id, depth);
+                (node.children || []).forEach(child => stack.push({ node: child, depth: depth + 1 }));
+            }
+        }
+
+        function refreshMoveOptions() {
+            const select = document.getElementById("moveParentSelect");
+            select.innerHTML = "";
+            const placeholder = document.createElement("option");
+            placeholder.value = "";
+            placeholder.textContent = "Select new parent...";
+            placeholder.disabled = true;
+            placeholder.selected = true;
+            select.appendChild(placeholder);
+            const nodes = flattenTree(treeData);
+            nodes.forEach(node => {
+                const option = document.createElement("option");
+                option.value = node.id;
+                option.textContent = `${typeLabels[node.type] || node.type} · ${node.title}`;
+                option.disabled = selectedNode && (node.id === selectedNode.id || isDescendant(node, selectedNode.id));
+                select.appendChild(option);
+            });
+            if (selectedNode) {
+                const currentParent = findParent(treeData, selectedNode.id);
+                if (currentParent) {
+                    select.value = currentParent.id;
+                } else {
+                    select.value = "";
+                }
+            }
+        }
+
+        function flattenTree(node, list = []) {
+            list.push(node);
+            (node.children || []).forEach(child => flattenTree(child, list));
+            return list;
+        }
+
+        function isDescendant(node, targetId) {
+            if (!node.children) return false;
+            for (const child of node.children) {
+                if (child.id === targetId || isDescendant(child, targetId)) return true;
+            }
+            return false;
+        }
+
+        function findParent(node, childId, parent = null) {
+            if (node.id === childId) return parent;
+            for (const child of node.children || []) {
+                const found = findParent(child, childId, node);
+                if (found) return found;
+            }
+            return null;
         }
 
         function addChildNode() {
             if (!selectedNode) return;
-            const title = document.getElementById("nodeTitle").value.trim();
-            const type = document.getElementById("nodeType").value;
-            const description = document.getElementById("nodeDescription").value.trim();
-
-            if (!title) {
-                alert("Please provide a title for the new node.");
-                return;
-            }
-
+            const parent = findNodeById(treeData, selectedNode.id);
+            if (!parent) return;
+            parent.children = parent.children || [];
+            const childType = nextChildType(parent.type);
             const newNode = {
-                id: generateId(type),
-                title,
-                type,
-                description,
+                id: generateNodeId(childType),
+                title: `${typeLabels[childType]} ${parent.children.length + 1}`,
+                subtitle: "",
+                type: childType,
+                description: "",
+                flow: "",
+                related: "",
+                approvals: "",
+                timing: "",
                 children: []
             };
-
-            const parent = findNodeById(treeData, selectedNode.id);
-            if (!parent.children) parent.children = [];
-            parent.collapsed = false;
             parent.children.push(newNode);
-
             selectNode(newNode);
             update(newNode.id);
         }
 
+        function duplicateNode() {
+            if (!selectedNode || selectedNode.id === "root") return;
+            const parent = findParent(treeData, selectedNode.id);
+            if (!parent) return;
+            const clone = structuredClone(selectedNode);
+            clone.id = generateNodeId(clone.type);
+            clone.title = `${clone.title} (Copy)`;
+            function reassignIds(node) {
+                node.id = generateNodeId(node.type);
+                (node.children || []).forEach(reassignIds);
+            }
+            (clone.children || []).forEach(reassignIds);
+            parent.children.push(clone);
+            selectNode(clone);
+            update(clone.id);
+        }
+
+        function nextChildType(type) {
+            const idx = typeOrder.indexOf(type);
+            return idx >= 0 && idx < typeOrder.length - 1 ? typeOrder[idx + 1] : typeOrder[typeOrder.length - 1];
+        }
+
         function updateNode() {
             if (!selectedNode) return;
-            const title = document.getElementById("nodeTitle").value.trim();
-            const type = document.getElementById("nodeType").value;
-            const description = document.getElementById("nodeDescription").value.trim();
-
-            if (!title) {
-                alert("The title cannot be empty.");
-                return;
-            }
-
             const node = findNodeById(treeData, selectedNode.id);
-            node.title = title;
-            node.type = type;
-            node.description = description;
-
-            selectNode(node);
+            node.title = document.getElementById("nodeTitle").value.trim() || "Untitled";
+            node.subtitle = document.getElementById("nodeSubtitle").value.trim();
+            node.type = document.getElementById("nodeType").value;
+            node.description = document.getElementById("nodeDescription").value;
+            node.flow = document.getElementById("nodeFlow").value;
+            node.related = document.getElementById("nodeRelated").value;
+            node.approvals = document.getElementById("nodeApprovals").value;
+            node.timing = document.getElementById("nodeTiming").value;
+            selectNode(node, false);
             update(node.id);
         }
 
         function deleteNode() {
             if (!selectedNode || selectedNode.id === "root") return;
-
             treeData = removeNode(treeData, selectedNode.id);
             selectedNode = null;
+            manualLayerDepth = null;
             updateSelectedPanel(null);
+            refreshLayerButtons();
             update();
         }
 
-        function removeNode(node, idToRemove) {
+        function removeNode(node, id) {
             if (!node.children) return node;
-            node.children = node.children.filter(child => child.id !== idToRemove)
-                .map(child => removeNode(child, idToRemove));
+            node.children = node.children
+                .filter(child => child.id !== id)
+                .map(child => removeNode(child, id));
             return node;
         }
 
         function findNodeById(node, id) {
             if (node.id === id) return node;
-            if (!node.children) return null;
-            for (const child of node.children) {
+            for (const child of node.children || []) {
                 const found = findNodeById(child, id);
                 if (found) return found;
             }
             return null;
+        }
+
+        function moveNode() {
+            if (!selectedNode) return;
+            const newParentId = document.getElementById("moveParentSelect").value;
+            if (!newParentId) return;
+            const node = findNodeById(treeData, selectedNode.id);
+            if (!node || node.id === "root") return;
+            const currentParent = findParent(treeData, node.id);
+            if (currentParent && currentParent.id === newParentId) return;
+
+            if (currentParent) {
+                currentParent.children = currentParent.children.filter(child => child.id !== node.id);
+            }
+            const newParent = findNodeById(treeData, newParentId);
+            newParent.children = newParent.children || [];
+            newParent.children.push(node);
+            selectNode(node);
+            update(node.id);
         }
 
         function downloadJSON() {
@@ -613,23 +963,18 @@
             const link = document.createElement("a");
             link.href = url;
             link.download = "system-management-design.json";
-            document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
             URL.revokeObjectURL(url);
         }
 
         function uploadJSON(event) {
             const file = event.target.files?.[0];
             if (!file) return;
-
             const reader = new FileReader();
-            reader.onload = function (e) {
+            reader.onload = (e) => {
                 try {
                     const parsed = JSON.parse(e.target.result);
-                    if (!parsed || typeof parsed !== "object") {
-                        throw new Error("Invalid JSON structure");
-                    }
+                    if (!parsed || typeof parsed !== "object") throw new Error("Invalid JSON");
                     treeData = parsed;
                     nodeIdCounter = maxExistingId(parsed);
                     selectNode(treeData);
@@ -645,23 +990,17 @@
             event.target.value = "";
         }
 
-        function maxExistingId(node) {
-            let max = nodeIdCounter;
-            const numeric = extractNumericId(node.id);
-            if (numeric) {
-                max = Math.max(max, numeric);
-            }
-            if (node.children) {
-                node.children.forEach(child => {
-                    max = Math.max(max, maxExistingId(child));
-                });
-            }
-            return max;
+        function resetTree() {
+            treeData = structuredClone(treeDataTemplate);
+            nodeIdCounter = 2000;
+            manualLayerDepth = null;
+            selectNode(treeData);
+            update(treeData.id);
         }
 
-        function extractNumericId(id) {
-            const match = /-(\d+)$/.exec(id);
-            return match ? Number(match[1]) : null;
+        function generateNodeId(type) {
+            nodeIdCounter += 1;
+            return `${type}-${nodeIdCounter}`;
         }
 
         function resetTree() {
@@ -673,16 +1012,43 @@
         }
 
         document.getElementById("addChild").addEventListener("click", addChildNode);
+        document.getElementById("duplicateNode").addEventListener("click", duplicateNode);
         document.getElementById("updateNode").addEventListener("click", updateNode);
         document.getElementById("deleteNode").addEventListener("click", deleteNode);
+        document.getElementById("moveNode").addEventListener("click", moveNode);
         document.getElementById("downloadTree").addEventListener("click", downloadJSON);
         document.getElementById("uploadInput").addEventListener("change", uploadJSON);
         document.getElementById("resetTree").addEventListener("click", resetTree);
+        document.getElementById("showAllLayers").addEventListener("click", () => {
+            manualLayerDepth = null;
+            refreshLayerButtons();
+            applyVisibility();
+        });
 
-        window.addEventListener("resize", () => {
-            const width = window.innerWidth - 360;
-            const height = window.innerHeight - 140;
-            svg.attr("viewBox", [-width / 2, -height / 2, width, height]);
+        document.getElementById("zoomIn").addEventListener("click", () => {
+            const newTransform = currentZoomTransform.scale(1.2);
+            svg.transition().duration(200).call(zoomBehavior.transform, newTransform);
+        });
+
+        document.getElementById("zoomOut").addEventListener("click", () => {
+            const newTransform = currentZoomTransform.scale(1 / 1.2);
+            svg.transition().duration(200).call(zoomBehavior.transform, newTransform);
+        });
+
+        document.getElementById("resetView").addEventListener("click", () => {
+            currentZoomTransform = d3.zoomIdentity;
+            svg.transition().duration(200).call(zoomBehavior.transform, d3.zoomIdentity);
+        });
+
+        const workspaceScroll = document.getElementById("workspaceScroll");
+        workspaceScroll.scrollLeft = (svg.node().clientWidth - workspaceScroll.clientWidth) / 2;
+        workspaceScroll.scrollTop = (svg.node().clientHeight - workspaceScroll.clientHeight) / 2;
+
+        svg.on("click", () => {
+            selectedNode = null;
+            manualLayerDepth = null;
+            updateSelectedPanel(null);
+            refreshLayerButtons();
             update();
         });
 
