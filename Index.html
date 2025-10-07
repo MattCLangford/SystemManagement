@@ -1,1 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>System Management Process Designer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: "Inter", sans-serif;
+        }
 
+        body {
+            margin: 0;
+            background: #f6f7fb;
+            color: #1f2430;
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            background: linear-gradient(135deg, #1f4b99, #2684ff);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(18, 43, 96, 0.25);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        header p {
+            margin: 0.35rem 0 0;
+            font-size: 0.95rem;
+            max-width: 52rem;
+            line-height: 1.5;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            min-height: calc(100vh - 96px);
+        }
+
+        aside {
+            padding: 1.5rem;
+            background: #ffffff;
+            border-right: 1px solid #e3e7f1;
+            overflow-y: auto;
+        }
+
+        aside h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+        }
+
+        label {
+            display: block;
+            margin-top: 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            margin-top: 0.35rem;
+            padding: 0.65rem 0.75rem;
+            font-size: 0.95rem;
+            border: 1px solid #d0d7e6;
+            border-radius: 8px;
+            background: #f9fafc;
+            transition: border-color 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #2684ff;
+            background: #fff;
+        }
+
+        textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .button-row {
+            margin-top: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.2s ease;
+        }
+
+        button.primary {
+            background: #2684ff;
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(38, 132, 255, 0.32);
+        }
+
+        button.secondary {
+            background: #e8efff;
+            color: #1f4b99;
+        }
+
+        button.danger {
+            background: #ff4d5a;
+            color: #fff;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        button:not(:disabled):hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(31, 75, 153, 0.16);
+        }
+
+        .panel-section {
+            margin-top: 1.5rem;
+        }
+
+        .panel-section:first-of-type {
+            margin-top: 0;
+        }
+
+        .panel-section h3 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #4b5876;
+            margin-bottom: 0.5rem;
+        }
+
+        .selected-node {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            padding: 0.75rem;
+            background: #f0f4ff;
+            border: 1px solid #d7e2ff;
+            border-radius: 10px;
+        }
+
+        .selected-node strong {
+            font-size: 1rem;
+            color: #1f4b99;
+        }
+
+        .tree-container {
+            position: relative;
+            background: #f6f7fb;
+            overflow: hidden;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .node circle {
+            fill: #fff;
+            stroke: #1f4b99;
+            stroke-width: 2px;
+            transition: fill 0.2s ease;
+        }
+
+        .node circle.selected {
+            fill: #ffdd57;
+            stroke: #ffaa00;
+        }
+
+        .node text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            fill: #1f2430;
+            text-anchor: middle;
+            pointer-events: none;
+        }
+
+        .link {
+            fill: none;
+            stroke: #b7c4dd;
+            stroke-width: 2px;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .toolbar button {
+            flex: 1;
+        }
+
+        .file-input {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-input input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-button {
+            border: 2px dashed #a7b4ce;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            color: #1f4b99;
+            font-weight: 600;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            margin-top: 0.75rem;
+        }
+
+        .legend span {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .legend i {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 960px) {
+            main {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+
+            aside {
+                border-right: none;
+                border-bottom: 1px solid #e3e7f1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>System Management Process Designer</h1>
+        <p>
+            Build multi-layered operational flows across your organization. Zoom out to map enterprise-level systems,
+            zoom in to design milestone workflows, and dive deep to define SOPs for every task. Export your framework as JSON
+            for sharing and versioning, or upload an existing design to continue iterating.
+        </p>
+    </header>
+    <main>
+        <aside>
+            <section class="panel-section">
+                <h2>Selection</h2>
+                <div class="selected-node" id="selectedNodePanel">
+                    <span>No node selected</span>
+                </div>
+                <div class="legend">
+                    <span><i style="background:#2684ff"></i> System / Process</span>
+                    <span><i style="background:#57c4ff"></i> Milestone</span>
+                    <span><i style="background:#ffb347"></i> Task</span>
+                    <span><i style="background:#ffdd57"></i> SOP Detail</span>
+                </div>
+            </section>
+
+            <section class="panel-section">
+                <h3>Node Details</h3>
+                <label for="nodeTitle">Title</label>
+                <input type="text" id="nodeTitle" placeholder="Name of process / task" />
+
+                <label for="nodeType">Layer</label>
+                <select id="nodeType">
+                    <option value="system">Company System</option>
+                    <option value="milestone">Milestone</option>
+                    <option value="task">Task</option>
+                    <option value="sop">SOP Detail</option>
+                </select>
+
+                <label for="nodeDescription">Description / SOP</label>
+                <textarea id="nodeDescription" placeholder="Capture key instructions, owners, inputs, outputs, or SOP steps..."></textarea>
+
+                <div class="button-row">
+                    <button class="primary" id="updateNode">Update Selected Node</button>
+                    <button class="secondary" id="addChild">Add Child to Selected</button>
+                    <button class="danger" id="deleteNode">Delete Selected Node</button>
+                </div>
+            </section>
+
+            <section class="panel-section">
+                <h3>Import & Export</h3>
+                <div class="toolbar">
+                    <button class="secondary" id="resetTree">Reset to Template</button>
+                    <button class="primary" id="downloadTree">Download JSON</button>
+                </div>
+                <div class="file-input" style="margin-top: 0.75rem;">
+                    <div class="upload-button">Upload JSON Design</div>
+                    <input type="file" id="uploadInput" accept="application/json" />
+                </div>
+            </section>
+        </aside>
+        <section class="tree-container">
+            <svg id="tree"></svg>
+        </section>
+    </main>
+
+    <script>
+        const treeDataTemplate = {
+            id: "root",
+            title: "Company Operating System",
+            type: "system",
+            description: "Top-level structure capturing the organization-wide operating model.",
+            children: [
+                {
+                    id: "milestone-1",
+                    title: "Customer Lifecycle",
+                    type: "milestone",
+                    description: "Journey from lead acquisition through retention and advocacy.",
+                    children: [
+                        {
+                            id: "task-1",
+                            title: "Lead Intake",
+                            type: "task",
+                            description: "Qualify inbound leads, capture requirements, and hand off to sales.",
+                            children: [
+                                {
+                                    id: "sop-1",
+                                    title: "Lead Intake SOP",
+                                    type: "sop",
+                                    description: "1. Review inbound request\n2. Conduct discovery call\n3. Document in CRM\n4. Assign owner",
+                                    children: []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: "milestone-2",
+                    title: "Internal Enablement",
+                    type: "milestone",
+                    description: "Systems ensuring teams can execute consistently with the operating model.",
+                    children: []
+                }
+            ]
+        };
+
+        let treeData = structuredClone(treeDataTemplate);
+        let selectedNode = null;
+        let nodeIdCounter = 1000;
+
+        const svg = d3.select("#tree");
+        const width = window.innerWidth - 360;
+        const height = window.innerHeight - 140;
+
+        const g = svg
+            .attr("viewBox", [-width / 2, -height / 2, width, height])
+            .append("g")
+            .attr("class", "tree-root");
+
+        const zoom = d3.zoom()
+            .scaleExtent([0.25, 3])
+            .on("zoom", (event) => {
+                g.attr("transform", event.transform);
+            });
+
+        svg.call(zoom).call(zoom.transform, d3.zoomIdentity);
+
+        const treeLayout = d3.tree().nodeSize([90, 180]);
+        const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+
+        const nodeColor = {
+            system: "#2684ff",
+            milestone: "#57c4ff",
+            task: "#ffb347",
+            sop: "#ffdd57"
+        };
+
+        function update(selectedId = selectedNode?.id) {
+            const root = d3.hierarchy(treeData, d => (d.collapsed ? null : d.children));
+            treeLayout(root);
+
+            const nodes = g.selectAll(".node")
+                .data(root.descendants(), d => d.data.id);
+
+            const links = g.selectAll(".link")
+                .data(root.links(), d => d.target.data.id);
+
+            links.enter()
+                .append("path")
+                .attr("class", "link")
+                .merge(links)
+                .attr("d", diagonal);
+
+            links.exit().remove();
+
+            const nodeEnter = nodes.enter()
+                .append("g")
+                .attr("class", "node")
+                .attr("transform", d => `translate(${d.y},${d.x})`)
+                .on("click", (_, d) => {
+                    selectNode(d.data);
+                    update(d.data.id);
+                })
+                .on("dblclick", (_, d) => toggleCollapse(d));
+
+            nodeEnter.append("circle")
+                .attr("r", 28)
+                .attr("fill", d => nodeColor[d.data.type] || "#fff");
+
+            nodeEnter.append("text")
+                .attr("dy", 4)
+                .text(d => d.data.title);
+
+            const nodeUpdate = nodeEnter.merge(nodes);
+            nodeUpdate.transition().attr("transform", d => `translate(${d.y},${d.x})`);
+
+            nodeUpdate.select("circle")
+                .attr("fill", d => nodeColor[d.data.type] || "#fff")
+                .classed("selected", d => d.data.id === selectedId);
+
+            nodeUpdate.select("text").text(d => d.data.title);
+
+            nodes.exit().remove();
+
+        }
+
+        function toggleCollapse(datum) {
+            if (!datum.data.children || datum.data.children.length === 0) return;
+            datum.data.collapsed = !datum.data.collapsed;
+            update(datum.data.id);
+        }
+
+        function selectNode(nodeData, updateForm = true) {
+            selectedNode = nodeData;
+            updateSelectedPanel(nodeData);
+
+            if (updateForm) {
+                document.getElementById("nodeTitle").value = nodeData.title || "";
+                document.getElementById("nodeType").value = nodeData.type || "system";
+                document.getElementById("nodeDescription").value = nodeData.description || "";
+            }
+        }
+
+        function updateSelectedPanel(node) {
+            const panel = document.getElementById("selectedNodePanel");
+            if (!node) {
+                panel.innerHTML = "<span>No node selected</span>";
+                document.getElementById("deleteNode").disabled = true;
+                document.getElementById("updateNode").disabled = true;
+                document.getElementById("addChild").disabled = true;
+                return;
+            }
+
+            panel.innerHTML = `
+                <strong>${node.title}</strong>
+                <span>Layer: ${formatType(node.type)}</span>
+                <span>${node.description ? node.description.replace(/\n/g, "<br>") : "No documentation yet."}</span>
+            `;
+
+            document.getElementById("deleteNode").disabled = node.id === "root";
+            document.getElementById("updateNode").disabled = false;
+            document.getElementById("addChild").disabled = false;
+        }
+
+        function formatType(type) {
+            switch (type) {
+                case "system":
+                    return "Company System";
+                case "milestone":
+                    return "Milestone";
+                case "task":
+                    return "Task";
+                case "sop":
+                    return "SOP Detail";
+                default:
+                    return type;
+            }
+        }
+
+        function generateId(prefix) {
+            nodeIdCounter += 1;
+            return `${prefix}-${nodeIdCounter}`;
+        }
+
+        function addChildNode() {
+            if (!selectedNode) return;
+            const title = document.getElementById("nodeTitle").value.trim();
+            const type = document.getElementById("nodeType").value;
+            const description = document.getElementById("nodeDescription").value.trim();
+
+            if (!title) {
+                alert("Please provide a title for the new node.");
+                return;
+            }
+
+            const newNode = {
+                id: generateId(type),
+                title,
+                type,
+                description,
+                children: []
+            };
+
+            const parent = findNodeById(treeData, selectedNode.id);
+            if (!parent.children) parent.children = [];
+            parent.collapsed = false;
+            parent.children.push(newNode);
+
+            selectNode(newNode);
+            update(newNode.id);
+        }
+
+        function updateNode() {
+            if (!selectedNode) return;
+            const title = document.getElementById("nodeTitle").value.trim();
+            const type = document.getElementById("nodeType").value;
+            const description = document.getElementById("nodeDescription").value.trim();
+
+            if (!title) {
+                alert("The title cannot be empty.");
+                return;
+            }
+
+            const node = findNodeById(treeData, selectedNode.id);
+            node.title = title;
+            node.type = type;
+            node.description = description;
+
+            selectNode(node);
+            update(node.id);
+        }
+
+        function deleteNode() {
+            if (!selectedNode || selectedNode.id === "root") return;
+
+            treeData = removeNode(treeData, selectedNode.id);
+            selectedNode = null;
+            updateSelectedPanel(null);
+            update();
+        }
+
+        function removeNode(node, idToRemove) {
+            if (!node.children) return node;
+            node.children = node.children.filter(child => child.id !== idToRemove)
+                .map(child => removeNode(child, idToRemove));
+            return node;
+        }
+
+        function findNodeById(node, id) {
+            if (node.id === id) return node;
+            if (!node.children) return null;
+            for (const child of node.children) {
+                const found = findNodeById(child, id);
+                if (found) return found;
+            }
+            return null;
+        }
+
+        function downloadJSON() {
+            const dataStr = JSON.stringify(treeData, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "system-management-design.json";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function uploadJSON(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (!parsed || typeof parsed !== "object") {
+                        throw new Error("Invalid JSON structure");
+                    }
+                    treeData = parsed;
+                    nodeIdCounter = maxExistingId(parsed);
+                    selectedNode = null;
+                    updateSelectedPanel(null);
+                    update();
+                    alert("Design imported successfully.");
+                } catch (err) {
+                    console.error(err);
+                    alert("Unable to import JSON file. Please verify the structure.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = "";
+        }
+
+        function maxExistingId(node) {
+            let max = nodeIdCounter;
+            const numeric = extractNumericId(node.id);
+            if (numeric) {
+                max = Math.max(max, numeric);
+            }
+            if (node.children) {
+                node.children.forEach(child => {
+                    max = Math.max(max, maxExistingId(child));
+                });
+            }
+            return max;
+        }
+
+        function extractNumericId(id) {
+            const match = /-(\d+)$/.exec(id);
+            return match ? Number(match[1]) : null;
+        }
+
+        function resetTree() {
+            treeData = structuredClone(treeDataTemplate);
+            selectedNode = null;
+            nodeIdCounter = 1000;
+            updateSelectedPanel(null);
+            update();
+        }
+
+        document.getElementById("addChild").addEventListener("click", addChildNode);
+        document.getElementById("updateNode").addEventListener("click", updateNode);
+        document.getElementById("deleteNode").addEventListener("click", deleteNode);
+        document.getElementById("downloadTree").addEventListener("click", downloadJSON);
+        document.getElementById("uploadInput").addEventListener("change", uploadJSON);
+        document.getElementById("resetTree").addEventListener("click", resetTree);
+
+        window.addEventListener("resize", () => {
+            const width = window.innerWidth - 360;
+            const height = window.innerHeight - 140;
+            svg.attr("viewBox", [-width / 2, -height / 2, width, height]);
+            update();
+        });
+
+        updateSelectedPanel(null);
+        update();
+    </script>
+</body>
+</html>
