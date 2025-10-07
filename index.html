@@ -493,24 +493,8 @@
 
         let treeData = structuredClone(treeDataTemplate);
         let selectedNode = null;
-        let nodeIdCounter = 2000;
-        let currentZoomTransform = d3.zoomIdentity;
-        let manualLayerDepth = null;
-        let relativeDepthMap = new Map();
-
-        const typeLabels = {
-            system: "Company System",
-            milestone: "Milestone",
-            task: "Task",
-            sop: "SOP Detail"
-        };
-
-        const typeColors = {
-            system: { stroke: "#1c4d9c", fill: "#e2efff" },
-            milestone: { stroke: "#2f8dff", fill: "#d8f0ff" },
-            task: { stroke: "#ff9a3c", fill: "#ffe4c3" },
-            sop: { stroke: "#ffcf40", fill: "#fff4c2" }
-        };
+        let nodeIdCounter = 1000;
+        let currentZoomScale = 1;
 
         const typeOrder = ["system", "milestone", "task", "sop"];
         const gridSize = 60;
@@ -523,9 +507,9 @@
         const zoomBehavior = d3.zoom()
             .scaleExtent([0.25, 3.5])
             .on("zoom", (event) => {
-                currentZoomTransform = event.transform;
-                svgRoot.attr("transform", currentZoomTransform);
-                applyVisibility();
+                g.attr("transform", event.transform);
+                currentZoomScale = event.transform.k;
+                applyZoomVisibility();
             });
 
         svg.call(zoomBehavior).call(zoomBehavior.transform, currentZoomTransform);
@@ -540,7 +524,25 @@
             return Infinity;
         }
 
-        function assignLayout(root) {
+        function visibleDepthForScale(scale) {
+            if (scale < 1.2) return 1; // Company system + milestones
+            if (scale < 2) return 2; // Reveal tasks
+            if (scale < 2.8) return 3; // Reveal SOP details
+            return Infinity;
+        }
+
+        function applyZoomVisibility() {
+            const depthLimit = visibleDepthForScale(currentZoomScale);
+
+            g.selectAll(".node")
+                .attr("display", d => (d.depth <= depthLimit ? null : "none"));
+
+            g.selectAll(".link")
+                .attr("display", d => (d.target.depth <= depthLimit ? null : "none"));
+        }
+
+        function update(selectedId = selectedNode?.id) {
+            const root = d3.hierarchy(treeData, d => (d.collapsed ? null : d.children));
             treeLayout(root);
             root.each(d => {
                 d.data.layoutX = d.x;
@@ -667,39 +669,7 @@
 
             nodes.exit().remove();
 
-            refreshLinkPaths();
-            applyVisibility();
-            refreshMoveOptions();
-        }
-
-        function renderNodeContent(data) {
-            const childTitles = (data.children || []).map(child => `<li>${escapeHTML(child.title)}</li>`).join("");
-            const related = data.related ? `<div class="meta"><strong>Related:</strong> ${escapeHTML(data.related)}</div>` : "";
-            const approvals = data.approvals ? `<div class="meta"><strong>Approvals:</strong> ${escapeHTML(data.approvals)}</div>` : "";
-            const timing = data.timing ? `<div class="meta"><strong>Timing:</strong> ${escapeHTML(data.timing)}</div>` : "";
-            const flow = data.flow ? `<div class="meta"><strong>Flow:</strong> ${escapeHTML(data.flow)}</div>` : "";
-            const description = data.description ? `<div class="description">${escapeHTML(data.description).replace(/\n/g, '<br>')}</div>` : "";
-
-            return `
-                <div class="title">${escapeHTML(data.title || "Untitled")}</div>
-                ${data.subtitle ? `<div class="subtitle">${escapeHTML(data.subtitle)}</div>` : ""}
-                ${description}
-                ${flow}
-                ${related}
-                ${approvals}
-                ${timing}
-                ${(data.children && data.children.length) ? `<div class="meta"><strong>Sub-steps:</strong></div><ul>${childTitles}</ul>` : ""}
-            `;
-        }
-
-        function escapeHTML(value) {
-            return (value || "").replace(/[&<>"']/g, c => ({
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                '"': "&quot;",
-                "'": "&#39;"
-            }[c] || c));
+            applyZoomVisibility();
         }
 
         function applyVisibility() {
@@ -1006,13 +976,13 @@
                     const parsed = JSON.parse(e.target.result);
                     if (!parsed || typeof parsed !== "object") throw new Error("Invalid JSON");
                     treeData = parsed;
-                    nodeIdCounter = maxExistingId(treeData) + 1;
+                    nodeIdCounter = maxExistingId(parsed);
                     selectNode(treeData);
                     update(treeData.id);
-                    manualLayerDepth = null;
-                    alert("Design imported successfully");
-                } catch (error) {
-                    console.error(error);
+                    applyZoomVisibility();
+                    alert("Design imported successfully.");
+                } catch (err) {
+                    console.error(err);
                     alert("Unable to import JSON file. Please verify the structure.");
                 }
             };
@@ -1033,14 +1003,12 @@
             return `${type}-${nodeIdCounter}`;
         }
 
-        function maxExistingId(node) {
-            let maxId = nodeIdCounter;
-            const match = /-(\d+)$/.exec(node.id || "");
-            if (match) maxId = Math.max(maxId, Number(match[1]));
-            (node.children || []).forEach(child => {
-                maxId = Math.max(maxId, maxExistingId(child));
-            });
-            return maxId;
+        function resetTree() {
+            treeData = structuredClone(treeDataTemplate);
+            nodeIdCounter = 1000;
+            selectNode(treeData);
+            update(treeData.id);
+            applyZoomVisibility();
         }
 
         document.getElementById("addChild").addEventListener("click", addChildNode);
@@ -1084,12 +1052,9 @@
             update();
         });
 
-        window.addEventListener("resize", () => {
-            applyVisibility();
-        });
-
         selectNode(treeData);
         update(treeData.id);
+        applyZoomVisibility();
     </script>
 </body>
 </html>
