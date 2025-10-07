@@ -531,6 +531,8 @@
             task: { stroke: "#ff9a3c", fill: "#ffe4c3" },
             sop: { stroke: "#ffcf40", fill: "#fff4c2" }
         };
+        let nodeIdCounter = 1000;
+        let currentZoomScale = 1;
 
         const typeOrder = ["system", "milestone", "task", "sop"];
         const gridSize = 60;
@@ -546,6 +548,9 @@
                 currentZoomTransform = event.transform;
                 svgRoot.attr("transform", currentZoomTransform);
                 applyVisibility();
+                g.attr("transform", event.transform);
+                currentZoomScale = event.transform.k;
+                applyZoomVisibility();
             });
 
         svg.call(zoomBehavior).call(zoomBehavior.transform, currentZoomTransform);
@@ -561,6 +566,25 @@
         }
 
         function assignLayout(root) {
+        function visibleDepthForScale(scale) {
+            if (scale < 1.2) return 1; // Company system + milestones
+            if (scale < 2) return 2; // Reveal tasks
+            if (scale < 2.8) return 3; // Reveal SOP details
+            return Infinity;
+        }
+
+        function applyZoomVisibility() {
+            const depthLimit = visibleDepthForScale(currentZoomScale);
+
+            g.selectAll(".node")
+                .attr("display", d => (d.depth <= depthLimit ? null : "none"));
+
+            g.selectAll(".link")
+                .attr("display", d => (d.target.depth <= depthLimit ? null : "none"));
+        }
+
+        function update(selectedId = selectedNode?.id) {
+            const root = d3.hierarchy(treeData, d => (d.collapsed ? null : d.children));
             treeLayout(root);
             root.each(d => {
                 d.data.layoutX = d.x;
@@ -710,6 +734,7 @@
                 ${timing}
                 ${(data.children && data.children.length) ? `<div class="meta"><strong>Sub-steps:</strong></div><ul>${childTitles}</ul>` : ""}
             `;
+            applyZoomVisibility();
         }
 
         function escapeHTML(value) {
@@ -1067,6 +1092,13 @@
                     alert("Design imported successfully");
                 } catch (error) {
                     console.error(error);
+                    nodeIdCounter = maxExistingId(parsed);
+                    selectNode(treeData);
+                    update(treeData.id);
+                    applyZoomVisibility();
+                    alert("Design imported successfully.");
+                } catch (err) {
+                    console.error(err);
                     alert("Unable to import JSON file. Please verify the structure.");
                 }
             };
@@ -1095,6 +1127,12 @@
                 maxId = Math.max(maxId, maxExistingId(child));
             });
             return maxId;
+        function resetTree() {
+            treeData = structuredClone(treeDataTemplate);
+            nodeIdCounter = 1000;
+            selectNode(treeData);
+            update(treeData.id);
+            applyZoomVisibility();
         }
 
         document.getElementById("addNode").addEventListener("click", addNode);
@@ -1145,6 +1183,9 @@
 
         selectNode(treeData);
         update(treeData.id);
+        selectNode(treeData);
+        update(treeData.id);
+        applyZoomVisibility();
     </script>
 </body>
 </html>
