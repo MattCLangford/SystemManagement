@@ -376,6 +376,7 @@
         let treeData = structuredClone(treeDataTemplate);
         let selectedNode = null;
         let nodeIdCounter = 1000;
+        let currentZoomScale = 1;
 
         const svg = d3.select("#tree");
         const width = window.innerWidth - 360;
@@ -390,6 +391,8 @@
             .scaleExtent([0.25, 3])
             .on("zoom", (event) => {
                 g.attr("transform", event.transform);
+                currentZoomScale = event.transform.k;
+                applyZoomVisibility();
             });
 
         svg.call(zoom).call(zoom.transform, d3.zoomIdentity);
@@ -403,6 +406,23 @@
             task: "#ffb347",
             sop: "#ffdd57"
         };
+
+        function visibleDepthForScale(scale) {
+            if (scale < 1.2) return 1; // Company system + milestones
+            if (scale < 2) return 2; // Reveal tasks
+            if (scale < 2.8) return 3; // Reveal SOP details
+            return Infinity;
+        }
+
+        function applyZoomVisibility() {
+            const depthLimit = visibleDepthForScale(currentZoomScale);
+
+            g.selectAll(".node")
+                .attr("display", d => (d.depth <= depthLimit ? null : "none"));
+
+            g.selectAll(".link")
+                .attr("display", d => (d.target.depth <= depthLimit ? null : "none"));
+        }
 
         function update(selectedId = selectedNode?.id) {
             const root = d3.hierarchy(treeData, d => (d.collapsed ? null : d.children));
@@ -451,6 +471,7 @@
 
             nodes.exit().remove();
 
+            applyZoomVisibility();
         }
 
         function toggleCollapse(datum) {
@@ -611,9 +632,9 @@
                     }
                     treeData = parsed;
                     nodeIdCounter = maxExistingId(parsed);
-                    selectedNode = null;
-                    updateSelectedPanel(null);
-                    update();
+                    selectNode(treeData);
+                    update(treeData.id);
+                    applyZoomVisibility();
                     alert("Design imported successfully.");
                 } catch (err) {
                     console.error(err);
@@ -645,10 +666,10 @@
 
         function resetTree() {
             treeData = structuredClone(treeDataTemplate);
-            selectedNode = null;
             nodeIdCounter = 1000;
-            updateSelectedPanel(null);
-            update();
+            selectNode(treeData);
+            update(treeData.id);
+            applyZoomVisibility();
         }
 
         document.getElementById("addChild").addEventListener("click", addChildNode);
@@ -665,8 +686,9 @@
             update();
         });
 
-        updateSelectedPanel(null);
-        update();
+        selectNode(treeData);
+        update(treeData.id);
+        applyZoomVisibility();
     </script>
 </body>
 </html>
